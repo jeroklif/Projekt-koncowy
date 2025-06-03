@@ -1,0 +1,141 @@
+name: Build Data Converter
+
+# Uruchomienie workflow
+on:
+  # Automatycznie raz w tygodniu (niedziela o 02:00 UTC)
+  schedule:
+    - cron: '0 2 * * 0'
+  
+  # Automatycznie po push na main/master
+  push:
+    branches: [ main, master ]
+  
+  # Ręcznie przez użytkownika
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      shell: powershell
+      run: |
+        Write-Host "Uruchamianie skryptu instalacyjnego..." -ForegroundColor Green
+        .\installResources.ps1
+    
+    - name: Build executable (CLI version)
+      shell: powershell
+      run: |
+        Write-Host "Budowanie wersji CLI..." -ForegroundColor Yellow
+        pyinstaller --onefile --name converter-cli converter.py
+        
+    - name: Build executable (GUI version)
+      shell: powershell
+      run: |
+        Write-Host "Budowanie wersji GUI..." -ForegroundColor Yellow
+        pyinstaller --onefile --noconsole --name converter-gui converter_ui.py
+    
+    - name: List build artifacts
+      shell: powershell
+      run: |
+        Write-Host "Pliki w katalogu dist:" -ForegroundColor Cyan
+        Get-ChildItem -Path "dist" -File | Format-Table Name, Length, LastWriteTime
+    
+    - name: Test CLI executable
+      shell: powershell
+      run: |
+        Write-Host "Testowanie pliku wykonywalnego CLI..." -ForegroundColor Yellow
+        # Utworzenie pliku testowego JSON
+        @"
+        {
+          "test": "data",
+          "number": 42,
+          "array": [1, 2, 3]
+        }
+        "@ | Out-File -FilePath "test.json" -Encoding UTF8
+        
+        # Test konwersji
+        .\dist\converter-cli.exe test.json test.xml
+        
+        # Sprawdzenie czy plik został utworzony
+        if (Test-Path "test.xml") {
+            Write-Host "Test CLI zakończony pomyślnie!" -ForegroundColor Green
+            Get-Content "test.xml"
+        } else {
+            Write-Host "Test CLI nieudany!" -ForegroundColor Red
+            exit 1
+        }
+    
+    - name: Create release package
+      shell: powershell
+      run: |
+        Write-Host "Tworzenie pakietu release..." -ForegroundColor Yellow
+        
+        # Utworzenie katalogu release
+        New-Item -ItemType Directory -Path "release" -Force
+        
+        # Kopiowanie plików
+        Copy-Item "dist\*.exe" -Destination "release\"
+        Copy-Item "README.md" -Destination "release\" -ErrorAction SilentlyContinue
+        Copy-Item "requirements.txt" -Destination "release\"
+        
+        # Utworzenie pliku informacyjnego
+        @"
+        Data Format Converter v1.0
+        ===========================
+        
+        Pliki w pakiecie:
+        - converter-cli.exe    - Wersja konsolowa
+        - converter-gui.exe    - Wersja z interfejsem graficznym
+        - requirements.txt     - Lista zależności Python
+        
+        Użycie wersji CLI:
+        converter-cli.exe input.json output.xml
+        converter-cli.exe config.yml settings.json
+        
+        Użycie wersji GUI:
+        Uruchom converter-gui.exe i używaj interfejsu graficznego
+        
+        Obsługiwane formaty: JSON, XML, YAML/YML
+        
+        Data kompilacji: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+        "@ | Out-File -FilePath "release\README.txt" -Encoding UTF8
+        
+        Write-Host "Pakiet release utworzony!" -ForegroundColor Green
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: data-converter-windows
+        path: release/
+        retention-days: 30
+    
+    - name: Build summary
+      shell: powershell
+      run: |
+        Write-Host "=" * 50 -ForegroundColor Cyan
+        Write-Host "PODSUMOWANIE KOMPILACJI" -ForegroundColor Green
+        Write-Host "=" * 50 -ForegroundColor Cyan
+        
+        Write-Host "Utworzone pliki wykonywalne:" -ForegroundColor Yellow
+        Get-ChildItem -Path "dist" -Filter "*.exe" | ForEach-Object {
+            $size = [math]::Round($_.Length / 1MB, 2)
+            Write-Host " $($_.Name) - ${size} MB" -ForegroundColor Green
+        }
+        
+        Write-Host "`nArtefakty gotowe do pobrania!" -ForegroundColor Green
+        Write-Host "Lokalizacja: release/" -ForegroundColor Cyan
+        
+        Write-Host "`nPliki w pakiecie release:" -ForegroundColor Yellow
+        Get-ChildItem -Path "release" | ForEach-Object {
+            Write-Host "  $($_.Name)" -ForegroundColor White
+        }
