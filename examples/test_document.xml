@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <header>
+    <title>Przykładowy dokument XML</title>
+    <author>Jan Kowalski</author>
+    <date>2024-01-15</date>
+    <version>1.0</version>
+  </header>
+  <content>
+    <section id="1">
+      <title>Wprowadzenie</title>
+      <paragraph>To jest pierwszy paragraf wprowadzenia.</paragraph>
+      <paragraph>To jest drugi paragraf z <emphasis>wyróżnionym tekstem</emphasis>.</paragraph>
+    </section>
+    <section id="2">
+      <title>Główna treść</title>
+      <paragraph>Główna treść dokumentu.</paragraph>
+      <list>
+        <item>Pierwszy element listy</item>
+        <item>Drugi element listy</item>
+        <item>Trzeci element listy</item>
+      </list>
+    </section>
+  </content>
+  <footer>
+    <copyright>© 2024 Wszystkie prawa zastrzeżone</copyright>
+    <contact>kontakt@example.com</contact>
+  </footer>
+</document>

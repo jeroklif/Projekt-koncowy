@@ -1,0 +1,35 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Jan Kowalski",
+      "email": "jan.kowalski@example.com",
+      "age": 30,
+      "active": true,
+      "address": {
+        "street": "Główna 123",
+        "city": "Warszawa",
+        "postal_code": "00-001"
+      },
+      "hobbies": ["programowanie", "czytanie", "sport"]
+    },
+    {
+      "id": 2,
+      "name": "Anna Nowak",
+      "email": "anna.nowak@example.com",
+      "age": 25,
+      "active": false,
+      "address": {
+        "street": "Kwiatowa 45",
+        "city": "Kraków", 
+        "postal_code": "30-001"
+      },
+      "hobbies": ["muzyka", "podróże"]
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-01-15",
+    "total_users": 2
+  }
+}
