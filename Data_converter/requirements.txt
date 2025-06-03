@@ -1,0 +1,6 @@
+PyYAML==6.0.1
+pyinstaller==6.2.0
+PyQt5==5.15.10
+altgraph==0.17.4
+packaging==23.2
+pyinstaller-hooks-contrib==2023.10

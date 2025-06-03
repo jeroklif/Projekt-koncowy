@@ -1,0 +1,32 @@
+database:
+  host: localhost
+  port: 5432
+  name: myapp_db
+  credentials:
+    username: admin
+    password: secret123
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  debug: true
+  ssl_enabled: false
+
+logging:
+  level: INFO
+  file: /var/log/myapp.log
+  max_size: 10MB
+  backup_count: 5
+
+features:
+  - authentication
+  - caching
+  - monitoring
+  - api_versioning
+
+cache:
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+  ttl: 3600
